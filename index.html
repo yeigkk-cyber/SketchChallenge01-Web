@@ -165,7 +165,7 @@ async function loadApprovedPack(onProgress) {
 	const [base, approvedPatch, completePatch] = await Promise.all([
 		fetch('index.pck'),
 		fetch('game-pack-source.txt'),
-        fetch('level-complete.pack.gz?v=1')
+        fetch('level-complete-v4.pack.gz')
 	]);
 	if (!base.ok || !approvedPatch.ok || !completePatch.ok) throw new Error('Game files could not be downloaded. Please reload.');
 	const body = base.body.getReader();
