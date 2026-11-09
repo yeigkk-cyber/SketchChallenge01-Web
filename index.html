@@ -158,8 +158,108 @@ body {
 
 		<script src="index.js"></script>
 		<script>
-const GODOT_CONFIG = {"args":[],"canvasResizePolicy":2,"emscriptenPoolSize":8,"ensureCrossOriginIsolationHeaders":true,"executable":"index","experimentalVK":false,"fileSizes":{"index.pck?v=66c731a":61180308,"index.wasm":39514754},"focusCanvas":true,"gdextensionLibs":[],"godotPoolSize":4};
+const GODOT_CONFIG = {"args":[],"canvasResizePolicy":2,"emscriptenPoolSize":8,"ensureCrossOriginIsolationHeaders":true,"executable":"index","experimentalVK":false,"fileSizes":{"index.pck":61175892,"index.wasm":39514754},"focusCanvas":true,"gdextensionLibs":[],"godotPoolSize":4};
 const GODOT_THREADS_ENABLED = false;
+// Apply the progress-panel source edits to the existing public export.
+async function applyProgressPanel(pack, directory) {
+	const edits = [
+  [
+    24689,
+    24726,
+    "\tcompleted_levels = 3 if Progress.stage3_completed else highest_level - 1"
+  ],
+  [
+    26212,
+    26915,
+    "\tstage_header.text = _ui(\"レベル %d\", \"အဆင့် %d\", \"Level %d\") % (stage + 1)\n\t%LevelProgressLabel.text = \"%d/3\" % completed_levels\n\t%ActiveLanguage.text = _ui(\"言語\", \"ဘာသာစကား\", \"Language\")\n\t%RestartButton.text = \"\"\n\tvar level := stage + 1\n\t%RestartButton.show()\n"
+  ],
+  [
+    34178,
+    37302,
+    "var level_selector: OptionButton\nvar progress_track: HBoxContainer\nvar level_markers: Array[Button] = []\nvar progress_icons: Dictionary = {}\n\nfunc _build_level_selector() -> void:\n\tvar row := stage_header.get_parent() as HBoxContainer\n\tvar layout := row.get_parent() as VBoxContainer\n\tvar progress_row := %LevelProgressLabel.get_parent() as HBoxContainer\n\tvar panel := PanelContainer.new()\n\tvar background := _progress_box(\"e5f3ff\", \"99cbf9\")\n\tbackground.content_margin_left = 12\n\tbackground.content_margin_right = 12\n\tbackground.content_margin_top = 8\n\tbackground.content_margin_bottom = 8\n\tpanel.add_theme_stylebox_override(\"panel\", background)\n\tlayout.add_child(panel)\n\tlayout.move_child(panel, row.get_index())\n\tvar stack := VBoxContainer.new()\n\tstack.add_theme_constant_override(\"separation\", 5)\n\tpanel.add_child(stack)\n\trow.reparent(stack)\n\tvar divider := ColorRect.new()\n\tdivider.color = Color(\"abd4f6\")\n\tdivider.custom_minimum_size.y = 1\n\tdivider.mouse_filter = Control.MOUSE_FILTER_IGNORE\n\tstack.add_child(divider)\n\tprogress_row.reparent(stack)\n\t%LevelProgress.hide()\n\n\tprogress_icons = {\n\t\t\"level\": _progress_icon('<path fill=\"#00bfff\" stroke=\"#0085f5\" stroke-width=\"2\" d=\"M12 4 20 12 12 20 4 12Z\"/>', 15),\n\t\t\"restart\": _progress_icon('<path fill=\"none\" stroke=\"#102e59\" stroke-width=\"2.5\" stroke-linecap=\"round\" stroke-linejoin=\"round\" d=\"M5 7h7a7 7 0 1 1-6.3 10M5 7l4-4M5 7l4 4\"/>', 19),\n\t\t\"language\": _progress_icon('<g fill=\"none\" stroke=\"#102e59\" stroke-width=\"1.7\"><circle cx=\"12\" cy=\"12\" r=\"9\"/><ellipse cx=\"12\" cy=\"12\" rx=\"4\" ry=\"9\"/><path d=\"M3 12h18\"/></g>', 19),\n\t\t\"menu\": _progress_icon('<path fill=\"none\" stroke=\"#fff\" stroke-width=\"2.4\" stroke-linecap=\"round\" d=\"M4 6h.1M4 12h.1M4 18h.1M9 6h11M9 12h11M9 18h11\"/>', 20),\n\t\t\"done\": _progress_icon('<path fill=\"#008cff\" stroke=\"#fff\" stroke-width=\"1.5\" stroke-linejoin=\"round\" d=\"M12 1 23 12 12 23 1 12Z\"/><path fill=\"none\" stroke=\"#fff\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" d=\"m7.5 12 3 3 6-6\"/>', 25),\n\t\t\"current\": _progress_icon('<path fill=\"#fff\" stroke=\"#0085f5\" stroke-width=\"2\" stroke-linejoin=\"round\" d=\"M12 1.8 22.2 12 12 22.2 1.8 12Z\"/><circle fill=\"#0085f5\" cx=\"12\" cy=\"12\" r=\"2.8\"/>', 25),\n\t\t\"locked\": _progress_icon('<path fill=\"none\" stroke=\"#7b8798\" stroke-width=\"3\" d=\"M7 11V7a5 5 0 0 1 10 0v4\"/><rect x=\"3\" y=\"9\" width=\"18\" height=\"13\" rx=\"3\" fill=\"#7b8798\" stroke=\"#fff\"/><circle cx=\"12\" cy=\"14\" r=\"2\" fill=\"#fff\"/><path d=\"M12 15v3\" stroke=\"#fff\" stroke-width=\"2\"/>', 25),\n\t}\n\n\tvar symbol := TextureRect.new()\n\tsymbol.texture = progress_icons[\"level\"]\n\tsymbol.size_flags_vertical = Control.SIZE_SHRINK_CENTER\n\tsymbol.mouse_filter = Control.MOUSE_FILTER_IGNORE\n\trow.add_child(symbol)\n\trow.move_child(symbol, 0)\n\tvar separator := ColorRect.new()\n\tseparator.color = divider.color\n\tseparator.custom_minimum_size = Vector2(1, 20)\n\tseparator.size_flags_vertical = Control.SIZE_SHRINK_CENTER\n\tseparator.mouse_filter = Control.MOUSE_FILTER_IGNORE\n\trow.add_child(separator)\n\trow.move_child(separator, stage_header.get_index() + 1)\n\n\tmenu_button = Button.new()\n\tmenu_button.name = \"StageMenuButton\"\n\tmenu_button.icon = progress_icons[\"menu\"]\n\tmenu_button.pressed.connect(_open_stage_menu)\n\trow.add_child(menu_button)\n\t%RestartButton.icon = progress_icons[\"restart\"]\n\t%ActiveLanguage.icon = progress_icons[\"language\"]\n\n\tlevel_selector = OptionButton.new()\n\tfor index in range(3):\n\t\tlevel_selector.add_item(\"Level %d\" % (index + 1), index)\n\tlevel_selector.hide()\n\trow.add_child(level_selector)\n\tlevel_selector.item_selected.connect(_select_level)\n\n\tvar count := %LevelProgressLabel as Label\n\tcount.size_flags_horizontal = Control.SIZE_FILL\n\tcount.size_flags_vertical = Control.SIZE_SHRINK_BEGIN\n\tcount.custom_minimum_size = Vector2(42, 0)\n\tcount.add_theme_font_size_override(\"font_size\", 21)\n\tcount.add_theme_color_override(\"font_color\", Color(\"102e59\"))\n\tprogress_track = HBoxContainer.new()\n\tprogress_track.size_flags_horizontal = Control.SIZE_EXPAND_FILL\n\tprogress_row.add_child(progress_track)\n\tprogress_track.draw.connect(_draw_progress_track)\n\tprogress_track.resized.connect(progress_track.queue_redraw)\n\tprogress_track.sort_children.connect(progress_track.queue_redraw)\n\tfor index in range(3):\n\t\tvar marker := Button.new()\n\t\tmarker.text = str(index + 1)\n\t\tmarker.size_flags_horizontal = Control.SIZE_EXPAND_FILL\n\t\tmarker.custom_minimum_size.y = 43\n\t\tmarker.vertical_icon_alignment = VERTICAL_ALIGNMENT_TOP\n\t\tmarker.icon_alignment = HORIZONTAL_ALIGNMENT_CENTER\n\t\tmarker.add_theme_constant_override(\"h_separation\", 0)\n\t\tmarker.add_theme_font_size_override(\"font_size\", 14)\n\t\tfor state in [\"normal\", \"hover\", \"pressed\", \"disabled\"]:\n\t\t\tmarker.add_theme_stylebox_override(state, StyleBoxEmpty.new())\n\t\tfor state in [\"font_color\", \"font_hover_color\", \"font_pressed_color\", \"font_focus_color\", \"font_disabled_color\"]:\n\t\t\tmarker.add_theme_color_override(state, Color(\"102e59\"))\n\t\tfor state in [\"icon_normal_color\", \"icon_hover_color\", \"icon_pressed_color\", \"icon_focus_color\", \"icon_disabled_color\"]:\n\t\t\tmarker.add_theme_color_override(state, Color.WHITE)\n\t\tmarker.pressed.connect(func(): level_selector.item_selected.emit(index))\n\t\tlevel_markers.append(marker)\n\t\tprogress_track.add_child(marker)\n\nfunc _progress_icon(markup: String, extent: int) -> Texture2D:\n\tvar image := Image.new()\n\timage.load_svg_from_string('<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"%d\" height=\"%d\" viewBox=\"0 0 24 24\">%s</svg>' % [extent, extent, markup])\n\treturn ImageTexture.create_from_image(image)\n\nfunc _progress_box(fill: String, border: String) -> StyleBoxFlat:\n\tvar box := StyleBoxFlat.new()\n\tbox.bg_color = Color(fill)\n\tbox.border_color = Color(border)\n\tbox.set_border_width_all(1)\n\tbox.set_corner_radius_all(9)\n\treturn box\n\nfunc _draw_progress_track() -> void:\n\tvar y := 12.5\n\tvar last := level_markers[2]\n\tvar end := last.position.x + last.size.x / 2\n\tprogress_track.draw_line(Vector2(0, y), Vector2(end, y), Color(\"a9c4df\"), 5, true)\n\tif completed_levels > 0:\n\t\tvar marker := level_markers[mini(completed_levels, 3) - 1]\n\t\tprogress_track.draw_line(Vector2(0, y), Vector2(marker.position.x + marker.size.x / 2, y), Color(\"009bff\"), 5, true)\n\nfunc _style_session_controls() -> void:\n\tif menu_button == null:\n\t\treturn\n\tvar font: Font = preload(\"res://Font/NotoSansMyanmar.ttf\") if language_option.selected == 1 else preload(\"res://Font/NotoSansCJKjp-Regular.otf\")\n\tfor button in [%RestartButton, %ActiveLanguage, menu_button]:\n\t\tvar primary: bool = button == menu_button\n\t\tbutton.custom_minimum_size = Vector2(34, 32)\n\t\tbutton.size_flags_vertical = Control.SIZE_SHRINK_CENTER\n\t\tbutton.add_theme_font_override(\"font\", font)\n\t\tbutton.add_theme_font_size_override(\"font_size\", 12)\n\t\tfor state in [\"normal\", \"hover\", \"pressed\", \"disabled\", \"focus\"]:\n\t\t\tvar fill := \"167de7\" if primary else \"ffffff\"\n\t\t\tif state in [\"hover\", \"pressed\"]:\n\t\t\t\tfill = \"0968cd\" if primary else \"d8ecff\"\n\t\t\telif state == \"disabled\":\n\t\t\t\tfill = \"8aafd5\" if primary else \"edf4fa\"\n\t\t\tvar box := _progress_box(fill, \"167de7\" if state == \"focus\" else \"a7cef4\")\n\t\t\tif state == \"focus\":\n\t\t\t\tbox.draw_center = false\n\t\t\t\tbox.set_border_width_all(2)\n\t\t\tbox.content_margin_left = 7\n\t\t\tbox.content_margin_right = 7\n\t\t\tbutton.add_theme_stylebox_override(state, box)\n\t\tfor state in [\"font_color\", \"font_hover_color\", \"font_pressed_color\", \"font_focus_color\"]:\n\t\t\tbutton.add_theme_color_override(state, Color(\"102e59\"))\n\tstage_header.add_theme_font_override(\"font\", font)\n\tstage_header.add_theme_font_size_override(\"font_size\", 17)\n\tstage_header.add_theme_color_override(\"font_color\", Color(\"102e59\"))\n\tstage_header.add_theme_stylebox_override(\"normal\", StyleBoxEmpty.new())\n\tstage_header.size_flags_vertical = Control.SIZE_SHRINK_CENTER\n\nfunc _refresh_level_selector() -> void:\n\tif level_selector == null:\n\t\treturn\n\tlevel_selector.disabled = highest_level < 2 or busy or not customer.intro_complete\n\tlevel_selector.set_item_disabled(1, highest_level < 2)\n\tlevel_selector.set_item_disabled(2, not Progress.is_level_unlocked(3))\n\tlevel_selector.select(stage)\n\tfor index in range(level_markers.size()):\n\t\tvar marker := level_markers[index]\n\t\tvar unlocked := not level_selector.is_item_disabled(index) or index == stage\n\t\tmarker.disabled = not unlocked or level_selector.disabled or index == stage\n\t\tvar state := \"done\" if index < completed_levels else (\"current\" if unlocked else \"locked\")\n\t\tmarker.icon = progress_icons[state]\n\t\tvar description := _ui(\"レベル %d\", \"အဆင့် %d\", \"Level %d\") % (index + 1)\n\t\tif not unlocked:\n\t\t\tdescription += _ui(\"（ロック中）\", \" (ပိတ်ထားသည်)\", \" (Locked)\")\n\t\telif index < completed_levels:\n\t\t\tdescription += _ui(\"（完了）\", \" (ပြီးစီး)\", \" (Completed)\")\n\t\tmarker.tooltip_text = description\n\tprogress_track.queue_redraw()\n\n"
+  ]
+];
+	const entryOffset = 35128;
+	const table = pack.subarray(directory);
+	const view = new DataView(table.buffer, table.byteOffset, table.byteLength);
+	const header = new DataView(pack.buffer);
+	const fileBase = Number(header.getBigUint64(24, true));
+	const offset = fileBase + Number(view.getBigUint64(entryOffset, true));
+	const length = Number(view.getBigUint64(entryOffset + 8, true));
+	const original = pack.subarray(offset, offset + length);
+	const hash = new Uint8Array(await crypto.subtle.digest('SHA-256', original));
+	const hashHex = Array.from(hash, byte => byte.toString(16).padStart(2, '0')).join('');
+	if (hashHex !== '219cf2a01d40051f164843dce72a47f2f17676a6541a27eb0e2f02612e4bd46d') {
+		throw new Error('The game version has changed. Please reload.');
+	}
+	const encoder = new TextEncoder();
+	const parts = [];
+	let cursor = 0;
+	for (const [start, end, text] of edits) {
+		parts.push(original.subarray(cursor, start), encoder.encode(text));
+		cursor = end;
+	}
+	parts.push(original.subarray(cursor));
+	const scriptSize = parts.reduce((size, part) => size + part.length, 0);
+	const scriptOffset = Math.ceil(directory / 16) * 16;
+	const newDirectory = Math.ceil((scriptOffset + scriptSize) / 16) * 16;
+	const result = new Uint8Array(newDirectory + table.length);
+	result.set(pack.subarray(0, directory));
+	let position = scriptOffset;
+	for (const part of parts) {
+		result.set(part, position);
+		position += part.length;
+	}
+	result.set(table, newDirectory);
+	const resultView = new DataView(result.buffer);
+	resultView.setBigUint64(32, BigInt(newDirectory), true);
+	const newEntry = newDirectory + entryOffset;
+	resultView.setBigUint64(newEntry, BigInt(scriptOffset - fileBase), true);
+	resultView.setBigUint64(newEntry + 8, BigInt(scriptSize), true);
+	result.set([95, 253, 184, 167, 142, 136, 140, 6, 122, 4, 183, 32, 74, 81, 184, 253], newEntry + 16);
+	return result.buffer;
+}
+
+async function loadApprovedPack(onProgress) {
+	const [base, approvedPatch, completePatch] = await Promise.all([
+		fetch('approved-base.pck?v=9e67b50'),
+		fetch('game-pack-source.txt?v=9e67b50'),
+        fetch('level-complete-v4.pack.gz?v=9e67b50')
+	]);
+	if (!base.ok || !approvedPatch.ok || !completePatch.ok) throw new Error('Game files could not be downloaded. Please reload.');
+	const body = base.body.getReader();
+	const chunks = [];
+	let loaded = 0;
+	const size = GODOT_CONFIG.fileSizes['index.pck'];
+	for (;;) {
+		const {value, done} = await body.read();
+		if (done) break;
+		chunks.push(value);
+		loaded += value.byteLength;
+		onProgress(loaded, size);
+	}
+	const original = new Uint8Array(await new Blob(chunks).arrayBuffer());
+	const offset = 61138224;
+	const oldHeader = new DataView(original.buffer);
+	if (original.length !== size || oldHeader.getBigUint64(32, true) !== BigInt(offset))
+		throw new Error('Game files are updating. Please reload.');
+	const previousShell = await approvedPatch.text();
+	const approvedData = previousShell.match(/data:application\/gzip;base64,([A-Za-z0-9+/=]+)/);
+	if (!approvedData) throw new Error('The game pack is incomplete. Please reload.');
+	const approvedResponse = await fetch('data:application/gzip;base64,' + approvedData[1]);
+	const approved = new Uint8Array(await new Response(approvedResponse.body.pipeThrough(new DecompressionStream('gzip'))).arrayBuffer());
+	const complete = new Uint8Array(await new Response(completePatch.body.pipeThrough(new DecompressionStream('gzip'))).arrayBuffer());
+	const approvedDirectory = 62680368;
+	const directory = new DataView(complete.buffer).getBigUint64(0, true);
+	const pointer = Number(directory) - approvedDirectory;
+	const result = new Uint8Array(approvedDirectory + complete.length - 8);
+	result.set(original.subarray(0, offset));
+	result.set(approved.subarray(0, approvedDirectory - offset), offset);
+	result.set(complete.subarray(8, pointer + 8), approvedDirectory);
+	result.set(complete.subarray(pointer + 8), Number(directory));
+	new DataView(result.buffer).setBigUint64(32, directory, true);
+	return applyProgressPanel(result, Number(directory));
+}
 
 (function () {
 	const statusOverlay = document.getElementById('status');
@@ -247,20 +347,13 @@ const GODOT_THREADS_ENABLED = false;
 		}
 	} else {
 		setStatusMode('progress');
-		const engine = new Engine({
-			...GODOT_CONFIG,
-			onProgress(current, total) {
-				if (total > 0) {
-					statusProgress.max = total;
-					statusProgress.value = current;
-				}
-			},
+		const engine = new Engine(GODOT_CONFIG);
+		const pack = loadApprovedPack((current, total) => {
+			statusProgress.max = total;
+			statusProgress.value = current;
 		});
-		// Use a fresh URL for this export while keeping Godot's internal pack name.
-		Promise.all([
-			engine.init('index'),
-			engine.preloadFile('index.pck?v=66c731a', 'index.pck'),
-		]).then(() => {
+		Promise.all([engine.init('index'), pack]).then(([, buffer]) => {
+			engine.copyToFS('index.pck', buffer);
 			return engine.start({args: ['--main-pack', 'index.pck']});
 		}).then(() => {
 			setStatusMode('hidden');
