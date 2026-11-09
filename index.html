@@ -89,54 +89,8 @@ body {
 	text-align: center;
 	z-index: 1;
 }
-		
-#status {
-  isolation: isolate;
-  overflow: hidden;
-  gap: clamp(8px, 1.5svh, 18px);
-  background: #123454;
-}
-#status-backdrop {
-  position: absolute;
-  inset: -32px;
-  z-index: -1;
-  background-position: center;
-  background-size: cover;
-  filter: blur(32px) brightness(.65);
-}
-#status-splash.fullsize--true {
-  position: relative;
-  inset: auto;
-  width: min(100%, calc(82svh * 2.07792));
-  height: auto;
-  max-height: none;
-  margin: 0;
-  flex: none;
-  object-fit: contain;
-  mask-image: linear-gradient(to right, transparent, black 5%, black 95%, transparent),
-              linear-gradient(to bottom, transparent, black 4%, black 94%, transparent);
-  mask-composite: intersect;
-}
-#loading-controls {
-  position: relative;
-  width: min(72%, 470px);
-  gap: clamp(5px, 1svh, 10px);
-  text-align: center;
-  color: #eff9ff;
-  font: 650 clamp(13px, 2.1svh, 20px) system-ui;
-  text-shadow: 0 2px 5px #0f2948;
-}
-#status-progress {
-  display: block; position: static; width: 100%; height: clamp(9px, 1.6svh, 16px);
-  box-sizing: border-box; appearance: none; border: 2px solid #a4d4f5;
-  border-radius: 99px; overflow: hidden; background: #163d63; accent-color: #53b5ff;
-}
-#status-progress::-webkit-progress-bar { background: #163d63; }
-#status-progress::-webkit-progress-value { background: linear-gradient(#ccf4ff,#2697ee); border-radius: 99px; }
-#status-progress::-moz-progress-bar { background: linear-gradient(#ccf4ff,#2697ee); }
-#status-notice { position: absolute; max-width: min(80%, 620px); }
-</style>
-		<link rel="icon" type="image/png" sizes="64x64" href="./kitchen-layout-tab-blue.png">
+		</style>
+		<link id="-gd-engine-icon" rel="icon" type="image/png" href="index.icon.png" />
 <link rel="apple-touch-icon" href="index.apple-touch-icon.png"/>
 
 	</head>
@@ -150,63 +104,20 @@ body {
 		</noscript>
 
 		<div id="status">
-			<div id="status-backdrop" aria-hidden="true"></div>
-			<img id="status-splash" class="show-image--true fullsize--true use-filter--true" src="./kitchen-loading-blue.jpg" alt="">
-			<div id="loading-controls"><progress id="status-progress" aria-label="Loading game"></progress><span>Loading…</span></div>
+			<img id="status-splash" class="show-image--true fullsize--true use-filter--true" src="index.png" alt="">
+			<progress id="status-progress"></progress>
 			<div id="status-notice"></div>
 		</div>
 
 		<script src="index.js"></script>
 		<script>
-const GODOT_CONFIG = {"args":[],"canvasResizePolicy":2,"emscriptenPoolSize":8,"ensureCrossOriginIsolationHeaders":true,"executable":"index","experimentalVK":false,"fileSizes":{"index.pck":61175892,"index.wasm":39514754},"focusCanvas":true,"gdextensionLibs":[],"godotPoolSize":4};
+const GODOT_CONFIG = {"args":[],"canvasResizePolicy":2,"emscriptenPoolSize":8,"ensureCrossOriginIsolationHeaders":true,"executable":"index","experimentalVK":false,"fileSizes":{"index.pck":61180308,"index.wasm":39514754},"focusCanvas":true,"gdextensionLibs":[],"godotPoolSize":4};
 const GODOT_THREADS_ENABLED = false;
-// Retain the existing Godot export and replace only the pack's changed UI entries.
-async function loadApprovedPack(onProgress) {
-	const [base, approvedPatch, completePatch] = await Promise.all([
-		fetch('index.pck'),
-		fetch('game-pack-source.txt'),
-        fetch('level-complete-v4.pack.gz')
-	]);
-	if (!base.ok || !approvedPatch.ok || !completePatch.ok) throw new Error('Game files could not be downloaded. Please reload.');
-	const body = base.body.getReader();
-	const chunks = [];
-	let loaded = 0;
-	const size = GODOT_CONFIG.fileSizes['index.pck'];
-	for (;;) {
-		const {value, done} = await body.read();
-		if (done) break;
-		chunks.push(value);
-		loaded += value.byteLength;
-		onProgress(loaded, size);
-	}
-	const original = new Uint8Array(await new Blob(chunks).arrayBuffer());
-	const offset = 61138224;
-	const oldHeader = new DataView(original.buffer);
-	if (original.length !== size || oldHeader.getBigUint64(32, true) !== BigInt(offset))
-		throw new Error('Game files are updating. Please reload.');
-	const previousShell = await approvedPatch.text();
-	const approvedData = previousShell.match(/data:application\/gzip;base64,([A-Za-z0-9+/=]+)/);
-	if (!approvedData) throw new Error('The game pack is incomplete. Please reload.');
-	const approvedResponse = await fetch('data:application/gzip;base64,' + approvedData[1]);
-	const approved = new Uint8Array(await new Response(approvedResponse.body.pipeThrough(new DecompressionStream('gzip'))).arrayBuffer());
-	const complete = new Uint8Array(await new Response(completePatch.body.pipeThrough(new DecompressionStream('gzip'))).arrayBuffer());
-	const approvedDirectory = 62680368;
-	const directory = new DataView(complete.buffer).getBigUint64(0, true);
-	const pointer = Number(directory) - approvedDirectory;
-	const result = new Uint8Array(approvedDirectory + complete.length - 8);
-	result.set(original.subarray(0, offset));
-	result.set(approved.subarray(0, approvedDirectory - offset), offset);
-	result.set(complete.subarray(8, pointer + 8), approvedDirectory);
-	result.set(complete.subarray(pointer + 8), Number(directory));
-	new DataView(result.buffer).setBigUint64(32, directory, true);
-	return result.buffer;
-}
+const engine = new Engine(GODOT_CONFIG);
 
 (function () {
 	const statusOverlay = document.getElementById('status');
-	document.getElementById('status-backdrop').style.backgroundImage = 'url(' + document.getElementById('status-splash').src + ')';
 	const statusProgress = document.getElementById('status-progress');
-	const loadingControls = document.getElementById('loading-controls');
 	const statusNotice = document.getElementById('status-notice');
 
 	let initializing = true;
@@ -222,7 +133,7 @@ async function loadApprovedPack(onProgress) {
 			return;
 		}
 		statusOverlay.style.visibility = 'visible';
-		loadingControls.style.display = mode === 'progress' ? 'grid' : 'none';
+		statusProgress.style.display = mode === 'progress' ? 'block' : 'none';
 		statusNotice.style.display = mode === 'notice' ? 'block' : 'none';
 		statusMode = mode;
 	}
@@ -288,14 +199,16 @@ async function loadApprovedPack(onProgress) {
 		}
 	} else {
 		setStatusMode('progress');
-		const engine = new Engine(GODOT_CONFIG);
-		const pack = loadApprovedPack((current, total) => {
-			statusProgress.max = total;
-			statusProgress.value = current;
-		});
-		Promise.all([engine.init('index'), pack]).then(([, buffer]) => {
-			engine.copyToFS('index.pck', buffer);
-			return engine.start({args: ['--main-pack', 'index.pck']});
+		engine.startGame({
+			'onProgress': function (current, total) {
+				if (current > 0 && total > 0) {
+					statusProgress.value = current;
+					statusProgress.max = total;
+				} else {
+					statusProgress.removeAttribute('value');
+					statusProgress.removeAttribute('max');
+				}
+			},
 		}).then(() => {
 			setStatusMode('hidden');
 		}, displayFailureNotice);
