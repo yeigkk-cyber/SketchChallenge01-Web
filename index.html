@@ -253,24 +253,29 @@ async function applyUiEdits(pack, directory) {
     "entryOffset": 35128,
     "checksum": "219cf2a01d40051f164843dce72a47f2f17676a6541a27eb0e2f02612e4bd46d",
     "digest": [
-      0,
-      44,
-      108,
-      243,
-      102,
-      228,
-      237,
-      234,
-      40,
-      180,
-      205,
-      158,
-      184,
-      62,
-      92,
-      1
+      94,
+      45,
+      215,
+      194,
+      178,
+      192,
+      250,
+      121,
+      148,
+      80,
+      19,
+      123,
+      7,
+      9,
+      120,
+      132
     ],
     "edits": [
+      [
+        5923,
+        5923,
+        "\tif not has_meta(\"stage3_shell\"):\n\t\t_stabilize_workspace()\n"
+      ],
       [
         24689,
         24727,
@@ -285,6 +290,11 @@ async function applyUiEdits(pack, directory) {
         26833,
         26915,
         ""
+      ],
+      [
+        34178,
+        34178,
+        "\n# Keep translated labels from feeding their text size back into the workspace.\nfunc _reserve_label_space(label: Label, minimum: Vector2) -> void:\n\tvar parent := label.get_parent()\n\tvar index := label.get_index()\n\tvar slot := Control.new()\n\tslot.name = label.name + \"Slot\"\n\tslot.custom_minimum_size = minimum\n\tslot.size_flags_horizontal = label.size_flags_horizontal\n\tslot.size_flags_vertical = label.size_flags_vertical\n\tslot.clip_contents = true\n\tslot.mouse_filter = Control.MOUSE_FILTER_IGNORE\n\tparent.add_child(slot)\n\tparent.move_child(slot, index)\n\tlabel.reparent(slot, false)\n\tlabel.clip_text = true\n\tlabel.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)\n\nfunc _stabilize_workspace() -> void:\n\t# These slots have room for the taller Myanmar glyphs and wrapped hints.\n\t_reserve_label_space(stage_header, Vector2(110, 28))\n\t_reserve_label_space(%DrawSubtitle, Vector2(0, 36))\n\t_reserve_label_space(status, Vector2(250, 54))\n\t_reserve_label_space(%CustomerName, Vector2(0, 32))\n\t_reserve_label_space(%BubbleTitle, Vector2(0, 32))\n\t_reserve_label_space(player_badge.status_label, Vector2(104, 26))\n\t%ActiveLanguage.fit_to_longest_item = false\n\t%ActiveLanguage.clip_text = true\n\n"
       ],
       [
         34211,
