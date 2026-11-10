@@ -17,7 +17,7 @@ jobs:
           mkdir -p live-qa screenshot-qa
           repo=https://yeigkk-cyber.github.io/SketchChallenge01-Web
           cp preview-background.html qa-latest.html
-          echo 'edb6ec9f8a66ec1591e357b53b9519d28bef2a66' | diff - <(git hash-object qa-latest.html)
+          echo '9b0241ffe0d7aa0e4c76fdf22c750d460231fff0' | diff - <(git hash-object qa-latest.html)
 
           for file in approved-base.pck game-pack-source.txt level-complete-v4.pack.gz; do
             curl -fsSL --retry 3 "$repo/$file?v=9e67b50" -o "live-qa/$file"

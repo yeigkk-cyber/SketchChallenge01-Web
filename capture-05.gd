@@ -14,6 +14,7 @@ func _screen(menu: Control, level: int, missing: String, locked: int = 0) -> voi
 	var card := menu.find_child("LevelCard%d" % level, true, false) as Button
 	assert(card != null and not card.disabled)
 	var rect := card.get_global_rect()
+	print("Geometry ", level, " ", rect, " menu ", menu.size, " scroll ", menu.lobby_scroll.size)
 	assert(absf(rect.get_center().x - menu.size.x / 2) < 3.0, "Selected level is off center")
 	assert(menu.login_brand.get_global_rect().position.y >= 0)
 	if not missing.is_empty(): assert(menu.find_child(missing, true, false) != null)

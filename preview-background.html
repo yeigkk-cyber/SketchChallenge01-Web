@@ -198,22 +198,22 @@ async function applyUiEdits(pack, directory) {
     "entryOffset": 19964,
     "checksum": "3248abc842aaa2f4e4245ab94cf97b82e5239bfc343f8cce439a56335e249775",
     "digest": [
-      183,
-      59,
-      95,
-      220,
-      7,
-      22,
-      226,
-      206,
-      114,
-      214,
-      74,
-      80,
-      208,
-      52,
-      166,
-      136
+      138,
+      19,
+      187,
+      94,
+      51,
+      12,
+      171,
+      49,
+      99,
+      179,
+      185,
+      29,
+      209,
+      101,
+      17,
+      127
     ],
     "edits": [
       [
@@ -324,7 +324,7 @@ async function applyUiEdits(pack, directory) {
       [
         16511,
         16554,
-        "\t\tcaption.custom_minimum_size.x = maxf(0.0, diameter - 10.0)\n\t\tcaption.clip_text = true\n"
+        "\t\tcaption.custom_minimum_size = Vector2(maxf(0.0, diameter - 10.0), 24 if direction == 0 else 19)\n\t\tcaption.clip_text = true\n"
       ],
       [
         17352,
@@ -374,12 +374,12 @@ async function applyUiEdits(pack, directory) {
       [
         22810,
         22938,
-        "\tshader.code = \"\"\"\nshader_type canvas_item;\nvoid fragment() {\n\tvec3 rgb = texture(TEXTURE, UV).rgb;\n\tfloat blue_backdrop = smoothstep(0.12, 0.30, rgb.b - max(rgb.r, rgb.g)) * (1.0 - smoothstep(0.23, 0.48, rgb.r));\n\tCOLOR.a *= 1.0 - blue_backdrop;\n}\n\"\"\"\n"
+        "\tshader.code = \"\"\"\nshader_type canvas_item;\nvarying vec4 ink;\nvoid vertex() { ink = COLOR; }\nvoid fragment() {\n\tvec4 pixel = texture(TEXTURE, (UV - vec2(0.5)) * 0.77 + vec2(0.5));\n\tvec3 rgb = pixel.rgb;\n\tfloat blue_backdrop = smoothstep(0.08, 0.21, rgb.b - rgb.r) * (1.0 - smoothstep(0.64, 0.86, rgb.g / max(rgb.b, 0.001))) * (1.0 - smoothstep(0.22, 0.40, rgb.r));\n\tCOLOR = vec4(rgb, pixel.a * (1.0 - blue_backdrop)) * ink;\n}\n\"\"\"\n"
       ],
       [
         27194,
         27404,
-        "\tlogin_brand.get_parent().add_theme_constant_override(\"separation\", 4 if carousel and not is_pause_overlay else 16)\n\tlobby_scroll.vertical_scroll_mode = ScrollContainer.SCROLL_MODE_SHOW_NEVER if is_pause_overlay else ScrollContainer.SCROLL_MODE_AUTO\n"
+        "\tlogin_brand.get_parent().add_theme_constant_override(\"separation\", 4 if carousel and not is_pause_overlay else 16)\n\tlobby_scroll.vertical_scroll_mode = ScrollContainer.SCROLL_MODE_SHOW_NEVER if carousel or is_pause_overlay else ScrollContainer.SCROLL_MODE_AUTO\n"
       ],
       [
         27578,
@@ -399,7 +399,7 @@ async function applyUiEdits(pack, directory) {
       [
         29084,
         29084,
-        "\tif showing_carousel and not is_pause_overlay:\n\t\tvar reserved := login_brand.custom_minimum_size.y + 48.0 + lobby_margin.get_theme_constant(\"margin_bottom\") + footer.get_combined_minimum_size().y\n\t\tlobby_scroll.custom_minimum_size.y = minf(height, maxf(120.0, size.y - reserved))\n"
+        "\tif showing_carousel and not is_pause_overlay:\n\t\tvar reserved := login_brand.custom_minimum_size.y + 40.0 + lobby_margin.get_theme_constant(\"margin_bottom\") + footer.get_combined_minimum_size().y\n\t\tlobby_scroll.custom_minimum_size.y = minf(height, maxf(120.0, size.y - reserved))\n"
       ]
     ]
   },
