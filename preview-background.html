@@ -198,22 +198,22 @@ async function applyUiEdits(pack, directory) {
     "entryOffset": 19964,
     "checksum": "3248abc842aaa2f4e4245ab94cf97b82e5239bfc343f8cce439a56335e249775",
     "digest": [
-      138,
-      19,
-      187,
-      94,
-      51,
-      12,
-      171,
-      49,
-      99,
-      179,
-      185,
-      29,
-      209,
-      101,
-      17,
-      127
+      196,
+      110,
+      242,
+      139,
+      160,
+      42,
+      160,
+      165,
+      140,
+      25,
+      156,
+      50,
+      59,
+      90,
+      224,
+      86
     ],
     "edits": [
       [
@@ -287,6 +287,11 @@ async function applyUiEdits(pack, directory) {
         "\t\tcard.name = \"LevelCard%d\" % level\n"
       ],
       [
+        13987,
+        14093,
+        "\t\tvar diameter := (244.0 if is_pause_overlay else 270.0) * available if direction == 0 else side_diameter\n"
+      ],
+      [
         14366,
         14798,
         "\t\t\tvar selected: bool = direction == 0\n\t\t\tvar outline := _glass_style(Color(\"d4eaff80\") if selected else Color(\"dceeff60\"),\n\t\t\t\tColor(\"d1f5ff\") if selected else Color(\"f8fdff\"), 18, 5 if selected else 2)\n\t\t\tif selected:\n\t\t\t\toutline.shadow_color = Color(\"44a9e890\")\n\t\t\t\toutline.shadow_size = 8\n\t\t\tif unlocked and state in [\"hover\", \"focus\"]: outline.border_color = Color.WHITE\n"
@@ -324,12 +329,17 @@ async function applyUiEdits(pack, directory) {
       [
         16511,
         16554,
-        "\t\tcaption.custom_minimum_size = Vector2(maxf(0.0, diameter - 10.0), 24 if direction == 0 else 19)\n\t\tcaption.clip_text = true\n"
+        "\t\tcaption.autowrap_mode = TextServer.AUTOWRAP_OFF\n\t\tcaption.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS\n\t\tcaption.custom_minimum_size = Vector2(maxf(0.0, diameter - 10.0), ceilf(caption.get_theme_font(\"font\").get_height(caption.get_theme_font_size(\"font_size\"))) + 2.0)\n\t\tcaption.vertical_alignment = VERTICAL_ALIGNMENT_CENTER\n"
       ],
       [
         17352,
         17382,
         "\t_carousel_arrow(navigation, 1)\n"
+      ],
+      [
+        17673,
+        17673,
+        "\t\tdetails.custom_minimum_size.y = 34\n"
       ],
       [
         19811,
