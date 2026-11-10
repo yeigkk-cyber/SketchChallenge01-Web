@@ -198,27 +198,32 @@ async function applyUiEdits(pack, directory) {
     "entryOffset": 19964,
     "checksum": "3248abc842aaa2f4e4245ab94cf97b82e5239bfc343f8cce439a56335e249775",
     "digest": [
-      64,
-      145,
-      19,
-      188,
-      142,
-      94,
-      134,
-      202,
-      136,
-      211,
-      79,
-      201,
-      168,
-      18,
+      183,
+      59,
+      95,
+      220,
+      7,
+      22,
+      226,
+      206,
+      114,
+      214,
+      74,
       80,
-      198
+      208,
+      52,
+      166,
+      136
     ],
     "edits": [
       [
         240,
         312,
+        ""
+      ],
+      [
+        713,
+        789,
         ""
       ],
       [
@@ -232,9 +237,144 @@ async function applyUiEdits(pack, directory) {
         "\tlobby_panel.size_flags_horizontal = Control.SIZE_SHRINK_CENTER\n"
       ],
       [
+        12121,
+        12144,
+        "\t\t\tbadge.light = true\n"
+      ],
+      [
+        12340,
+        12340,
+        "\t\t\tvar badge_style := _glass_style(Color(\"d9edf9f0\"), Color(\"f8fdff\"), 18, 2)\n\t\t\tbadge_style.content_margin_left = 9\n\t\t\tbadge_style.content_margin_right = 10\n\t\t\tbadge_style.content_margin_top = 6\n\t\t\tbadge_style.content_margin_bottom = 6\n\t\t\tbadge.add_theme_stylebox_override(\"panel\", badge_style)\n\t\t\tif Progress.session_kind != \"account\":\n\t\t\t\tbadge.letter.text = \"\"\n\t\t\t\tbadge.letter.draw.connect(func():\n\t\t\t\t\tvar middle: Vector2 = badge.letter.size * 0.5\n\t\t\t\t\tvar ink := Color(\"204e78\")\n\t\t\t\t\tbadge.letter.draw_arc(middle + Vector2(0, -4), 3.6, 0, TAU, 20, ink, 1.6, true)\n\t\t\t\t\tbadge.letter.draw_arc(middle + Vector2(0, 6), 7, PI, TAU, 20, ink, 1.6, true)\n\t\t\t\t)\n"
+      ],
+      [
+        12701,
+        12742,
+        "\t\t\t_style_glass_menu_button(help_button)\n"
+      ],
+      [
+        13077,
+        13077,
+        "\tvar navigation := HBoxContainer.new()\n\tnavigation.alignment = BoxContainer.ALIGNMENT_CENTER\n\tnavigation.add_theme_constant_override(\"separation\", 12)\n\tcontent.add_child(navigation)\n\t_carousel_arrow(navigation, -1)\n\tvar frame := PanelContainer.new()\n\tvar rails := _glass_style(Color(0.84, 0.92, 1.0, 0.27), Color(\"f5fcff\"), 24, 2)\n\tfor side in [SIDE_LEFT, SIDE_TOP, SIDE_RIGHT, SIDE_BOTTOM]: rails.set_content_margin(side, 12)\n\tframe.add_theme_stylebox_override(\"panel\", rails)\n\tnavigation.add_child(frame)\n\tframe.draw.connect(func():\n\t\tvar radius := 23.0\n\t\tvar corners := [Vector2(radius, radius), Vector2(frame.size.x - radius, radius),\n\t\t\tVector2(frame.size.x - radius, frame.size.y - radius), Vector2(radius, frame.size.y - radius)]\n\t\tfor i in range(4):\n\t\t\tvar angle := PI + i * PI * 0.5\n\t\t\tframe.draw_arc(corners[i], radius, angle, angle + PI * 0.5, 16, Color(\"a3ddff\"), 4, true)\n\t)\n"
+      ],
+      [
+        13222,
+        13282,
+        "\tframe.add_child(carousel)\n"
+      ],
+      [
         13418,
-        13418,
-        "\tif not is_pause_overlay:\n\t\tavailable = minf(available, clampf((size.y - 175.0) / 435.0, 0.25, 1.0))\n"
+        13491,
+        "\tif not is_pause_overlay:\n\t\tavailable = minf(available, clampf((size.y - 175.0) / 435.0, 0.25, 1.0))\n\tvar side_diameter := floorf((158.0 if is_pause_overlay else 190.0) * available)\n\tvar draft: Texture2D = _drawing_card_art()\n"
+      ],
+      [
+        13567,
+        13567,
+        "\t\tvar stage_column := VBoxContainer.new()\n\t\tstage_column.alignment = BoxContainer.ALIGNMENT_CENTER\n\t\tstage_column.add_theme_constant_override(\"separation\", 7)\n\t\tcarousel.add_child(stage_column)\n"
+      ],
+      [
+        13606,
+        13641,
+        "\t\t\tvar empty_slot := Panel.new()\n\t\t\tempty_slot.name = \"NoPreviousLevel\" if direction < 0 else \"NoNextLevel\"\n"
+      ],
+      [
+        13698,
+        13791,
+        "\t\t\tempty_slot.custom_minimum_size = Vector2.ONE * side_diameter\n\t\t\tempty_slot.add_theme_stylebox_override(\"panel\", _glass_style(Color.TRANSPARENT, Color(1, 1, 1, 0.42), 18, 2))\n\t\t\tstage_column.add_child(empty_slot)\n\t\t\tvar empty_label := Label.new()\n\t\t\tempty_label.text = _text(\"前のステージなし\", \"ရှေ့အဆင့် မရှိပါ\", \"No previous level\") if direction < 0 else _text(\"次のステージなし\", \"နောက်အဆင့် မရှိပါ\", \"No next level\")\n\t\t\tempty_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER\n\t\t\tempty_label.clip_text = true\n\t\t\tempty_label.add_theme_font_size_override(\"font_size\", 13)\n\t\t\tempty_label.add_theme_color_override(\"font_color\", Color(\"4e7299b8\"))\n\t\t\tstage_column.add_child(empty_label)\n"
+      ],
+      [
+        13929,
+        13929,
+        "\t\tcard.name = \"LevelCard%d\" % level\n"
+      ],
+      [
+        14366,
+        14798,
+        "\t\t\tvar selected: bool = direction == 0\n\t\t\tvar outline := _glass_style(Color(\"d4eaff80\") if selected else Color(\"dceeff60\"),\n\t\t\t\tColor(\"d1f5ff\") if selected else Color(\"f8fdff\"), 18, 5 if selected else 2)\n\t\t\tif selected:\n\t\t\t\toutline.shadow_color = Color(\"44a9e890\")\n\t\t\t\toutline.shadow_size = 8\n\t\t\tif unlocked and state in [\"hover\", \"focus\"]: outline.border_color = Color.WHITE\n"
+      ],
+      [
+        14881,
+        14959,
+        "\t\tart.texture = draft if level == 1 else BLUE.texture(BLUE_STAGE_ART[level - 1], STAGE_ART[level - 1])\n"
+      ],
+      [
+        15010,
+        15010,
+        "\t\tart.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED\n"
+      ],
+      [
+        15059,
+        15151,
+        "\t\tart.modulate.a = 1.0 if unlocked else 0.64\n\t\tif level != 1: art.material = _clear_blue_art()\n"
+      ],
+      [
+        15173,
+        15268,
+        "\t\tart.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT, Control.PRESET_MODE_MINSIZE, 9)\n"
+      ],
+      [
+        15329,
+        15329,
+        "\t\t\tlock_badge.name = \"LockBadge\"\n"
+      ],
+      [
+        16052,
+        16390,
+        ""
+      ],
+      [
+        16511,
+        16554,
+        "\t\tcaption.custom_minimum_size.x = maxf(0.0, diameter - 10.0)\n\t\tcaption.clip_text = true\n"
+      ],
+      [
+        17352,
+        17382,
+        "\t_carousel_arrow(navigation, 1)\n"
+      ],
+      [
+        19811,
+        19811,
+        "\tarrow.name = \"PreviousLevel\" if direction < 0 else \"NextLevel\"\n"
+      ],
+      [
+        19982,
+        20060,
+        "\t_style_glass_menu_button(arrow)\n\tarrow.custom_minimum_size = Vector2(42, 42)\n"
+      ],
+      [
+        20456,
+        20514,
+        "\t\tarrow.draw_polyline(points, Color(\"204e78\"), 2.6, true)\n"
+      ],
+      [
+        20539,
+        20594,
+        "func _glass_style(fill: Color, rim: Color, radius: int, border: int) -> StyleBoxFlat:\n\tvar box := StyleBoxFlat.new()\n\tbox.bg_color = fill\n\tbox.border_color = rim\n\tbox.set_corner_radius_all(radius)\n\tbox.set_border_width_all(border)\n\treturn box\n\nfunc _style_glass_menu_button(button: Button) -> void:\n"
+      ],
+      [
+        20640,
+        20694,
+        "\tbutton.add_theme_font_size_override(\"font_size\", 22)\n"
+      ],
+      [
+        20761,
+        21072,
+        "\t\tvar style := _glass_style(Color(\"e4f4ffee\") if state != \"hover\" else Color(\"c9eaff\"), Color(\"f8fdff\"), 12, 2)\n\t\tstyle.shadow_color = Color(\"3a678545\")\n\t\tstyle.shadow_size = 4\n\t\tstyle.shadow_offset = Vector2(0, 2)\n"
+      ],
+      [
+        21236,
+        21292,
+        "\t\tbutton.add_theme_color_override(key, Color(\"204e78\"))\n"
+      ],
+      [
+        22745,
+        22782,
+        "func _drawing_card_art() -> Texture2D:\n\tvar image := Image.new()\n\timage.load_svg_from_string('<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"320\" height=\"320\" viewBox=\"0 0 320 320\"><rect width=\"320\" height=\"320\" rx=\"19\" fill=\"#a9cee8\"/><rect x=\"24\" y=\"19\" width=\"272\" height=\"277\" rx=\"8\" fill=\"#fcf4de\"/><g stroke=\"#c8d7db\" stroke-width=\"1\"><path d=\"M36 24v244M29 36h260\"/><path d=\"M52 24v244M29 52h260\"/><path d=\"M68 24v244M29 68h260\"/><path d=\"M84 24v244M29 84h260\"/><path d=\"M100 24v244M29 100h260\"/><path d=\"M116 24v244M29 116h260\"/><path d=\"M132 24v244M29 132h260\"/><path d=\"M148 24v244M29 148h260\"/><path d=\"M164 24v244M29 164h260\"/><path d=\"M180 24v244M29 180h260\"/><path d=\"M196 24v244M29 196h260\"/><path d=\"M212 24v244M29 212h260\"/><path d=\"M228 24v244M29 228h260\"/><path d=\"M244 24v244M29 244h260\"/><path d=\"M260 24v244M29 260h260\"/><path d=\"M276 24v244M29 276h260\"/></g><g fill=\"none\" stroke=\"#1c4166\" stroke-width=\"3\" stroke-linejoin=\"round\"><path d=\"M66 242V73H263V239H240 M64 246H191 M73 233V82H255V231H242\"/><path d=\"M77 85H250V117H113V231H77Z\"/><path d=\"M127 86v32m32-32v32m42-32v32m32-32v32M77 150h36m-36 38h36\"/><rect x=\"83\" y=\"157\" width=\"24\" height=\"23\" rx=\"4\"/><rect x=\"133\" y=\"148\" width=\"80\" height=\"50\" rx=\"2\"/><path d=\"M191 245v-46a45 45 0 0 1 45 45\" stroke-dasharray=\"4 4\"/><path d=\"M66 54h197m-197-6v12m197-12v12M48 73v170m-6-170h12m-12 170h12\" stroke-width=\"2\"/><circle cx=\"170\" cy=\"97\" r=\"4\"/><circle cx=\"183\" cy=\"97\" r=\"4\"/><circle cx=\"170\" cy=\"109\" r=\"4\"/><circle cx=\"183\" cy=\"109\" r=\"4\"/></g><path d=\"M212 273l68-69 11 11-69 69-15 4Z\" fill=\"#e8a44e\" stroke=\"#936035\" stroke-width=\"2\"/><path d=\"M207 288l6-15 9 11Z\" fill=\"#254260\"/><path d=\"M37 272h136v14H37Z\" fill=\"#d9e6ed\" stroke=\"#537692\"/><path d=\"M47 273v7m10-7v5m10-5v7m10-7v5m10-5v7m10-7v5m10-5v7m10-7v5m10-5v7m10-7v5m10-5v7m10-7v5\" stroke=\"#537692\"/></svg>')\n\treturn ImageTexture.create_from_image(image)\n\nfunc _clear_blue_art() -> ShaderMaterial:\n"
+      ],
+      [
+        22810,
+        22938,
+        "\tshader.code = \"\"\"\nshader_type canvas_item;\nvoid fragment() {\n\tvec3 rgb = texture(TEXTURE, UV).rgb;\n\tfloat blue_backdrop = smoothstep(0.12, 0.30, rgb.b - max(rgb.r, rgb.g)) * (1.0 - smoothstep(0.23, 0.48, rgb.r));\n\tCOLOR.a *= 1.0 - blue_backdrop;\n}\n\"\"\"\n"
       ],
       [
         27194,
