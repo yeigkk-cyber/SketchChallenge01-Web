@@ -16,7 +16,7 @@ jobs:
           set -euo pipefail
           mkdir -p live-qa screenshot-qa
           repo=https://yeigkk-cyber.github.io/SketchChallenge01-Web
-          curl -fsSL --retry 3 "https://raw.githubusercontent.com/yeigkk-cyber/SketchChallenge01-Web/b844c357795a52db13d853aed2657185e1c70186/index.html" -o qa-latest.html
+          cp preview-background.html qa-latest.html
           echo '8dfdcb81f0b07cb0325495488342fd1881ac05e7' | diff - <(git hash-object qa-latest.html)
           curl -fsSL --retry 3 https://raw.githubusercontent.com/yeigkk-cyber/SketchChallenge01-Web/b844c357795a52db13d853aed2657185e1c70186/index.html -o stable-latest.html
           for file in approved-base.pck game-pack-source.txt level-complete-v4.pack.gz; do
