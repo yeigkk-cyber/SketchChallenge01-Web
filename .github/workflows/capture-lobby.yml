@@ -9,6 +9,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 12
     steps:
+      - uses: actions/checkout@v7
       - name: Fetch builds and Godot
         shell: bash
         run: |
@@ -16,8 +17,8 @@ jobs:
           mkdir -p live-qa screenshot-qa
           repo=https://yeigkk-cyber.github.io/SketchChallenge01-Web
           curl -fsSL --retry 3 "https://raw.githubusercontent.com/yeigkk-cyber/SketchChallenge01-Web/b844c357795a52db13d853aed2657185e1c70186/index.html" -o qa-latest.html
-          echo 'dd826a9ce4550ec65ef85267206dfd9c7015268b' | diff - <(git hash-object qa-latest.html)
-          curl -fsSL --retry 3 https://raw.githubusercontent.com/yeigkk-cyber/SketchChallenge01-Web/b3daec1c7a731d5bf5da8fbe933b2a78dc215344/index.html -o stable-latest.html
+          echo '8dfdcb81f0b07cb0325495488342fd1881ac05e7' | diff - <(git hash-object qa-latest.html)
+          curl -fsSL --retry 3 https://raw.githubusercontent.com/yeigkk-cyber/SketchChallenge01-Web/b844c357795a52db13d853aed2657185e1c70186/index.html -o stable-latest.html
           for file in approved-base.pck game-pack-source.txt level-complete-v4.pack.gz; do
             curl -fsSL --retry 3 "$repo/$file?v=9e67b50" -o "live-qa/$file"
           done
