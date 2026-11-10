@@ -1,0 +1,79 @@
+name: Capture lobby comparison
+on:
+  push:
+    branches: [qa/lobby-comparison-b3daec1]
+permissions:
+  contents: read
+jobs:
+  capture:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - name: Fetch builds and Godot
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p live-qa screenshot-qa
+          repo=https://yeigkk-cyber.github.io/SketchChallenge01-Web
+          curl -fsSL --retry 3 "$repo/?v=b3daec1&capture=1" -o qa-latest.html
+          echo '5abb9ceeeccad291f3ac4ce5b88fc9c39f165d48' | diff - <(git hash-object qa-latest.html)
+          curl -fsSL --retry 3 https://raw.githubusercontent.com/yeigkk-cyber/SketchChallenge01-Web/7593c0fc8f213d4c26f4006e4d753885f1bd4112/index.html -o stable-latest.html
+          for file in approved-base.pck game-pack-source.txt level-complete-v4.pack.gz; do
+            curl -fsSL --retry 3 "$repo/$file?v=9e67b50" -o "live-qa/$file"
+          done
+          curl -fsSL --retry 3 https://github.com/godotengine/godot-builds/releases/download/4.7.2-stable/Godot_v4.7.2-stable_linux.x86_64.zip -o godot.zip
+          unzip -q godot.zip
+      - name: Render both builds
+        shell: bash
+        run: |
+          set -euo pipefail
+          cat > assemble.cjs <<'JS'
+          const fs = require('node:fs');
+          const vm = require('node:vm');
+          const assert = require('node:assert/strict');
+          (async () => {
+           const context = {fetch: async url => url.startsWith('data:') ? fetch(url) : new Response(fs.readFileSync('live-qa/' + url.split('?')[0])), Response, Blob, Uint8Array, DataView, TextEncoder, DecompressionStream, crypto};
+           for (const [name, html] of [['before','stable-latest.html'], ['live','qa-latest.html']]) {
+            const sandbox = vm.createContext({...context});
+            const code = fs.readFileSync(html, 'utf8').split('const GODOT_CONFIG')[1].split('(function () {')[0];
+            const pack = await vm.runInContext('const GODOT_CONFIG' + code + '\nloadApprovedPack(() => {})', sandbox);
+            fs.writeFileSync(name + '-screens.pck', Buffer.from(pack));
+           }
+          })();
+          JS
+          cat > capture.gd <<'GD'
+          extends SceneTree
+
+          func _initialize() -> void:
+          	call_deferred("_capture")
+
+          func _save(path: String) -> void:
+          	for frame in range(8):
+          		await process_frame
+          	await RenderingServer.frame_post_draw
+          	var image := root.get_texture().get_image()
+          	assert(image != null and not image.is_empty())
+          	assert(image.save_png(path) == OK)
+
+          func _capture() -> void:
+          	root.size = Vector2i(1280, 720)
+          	set_meta("kitchen_language", 0)
+          	var menu := (load("res://GameMenu.tscn") as PackedScene).instantiate()
+          	root.add_child(menu)
+          	var prefix := OS.get_cmdline_user_args()[0]
+          	await _save(prefix + "-login.png")
+          	menu._stage_menu()
+          	await _save(prefix + "-level-select.png")
+          	quit()
+          GD
+          node assemble.cjs
+          for version in before live; do
+            LIBGL_ALWAYS_SOFTWARE=1 xvfb-run -a -s '-screen 0 1280x720x24' timeout 35 ./Godot_v4.7.2-stable_linux.x86_64 --rendering-method gl_compatibility --audio-driver Dummy --main-pack "$version-screens.pck" --script "$PWD/capture.gd" -- "$PWD/screenshot-qa/$version"
+          done
+          test "$(find screenshot-qa -name '*.png' | wc -l)" -eq 4
+      - uses: actions/upload-artifact@v7
+        with:
+          name: lobby-screenshots
+          path: screenshot-qa/
+          if-no-files-found: error
+          retention-days: 3
