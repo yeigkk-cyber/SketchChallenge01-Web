@@ -198,22 +198,22 @@ async function applyUiEdits(pack, directory) {
     "entryOffset": 19964,
     "checksum": "3248abc842aaa2f4e4245ab94cf97b82e5239bfc343f8cce439a56335e249775",
     "digest": [
-      116,
-      145,
-      168,
-      24,
-      51,
-      6,
-      159,
-      109,
-      155,
-      26,
-      45,
-      250,
-      230,
+      34,
+      150,
+      157,
+      150,
+      23,
+      225,
+      114,
       20,
-      199,
-      109
+      4,
+      43,
+      149,
+      115,
+      8,
+      128,
+      170,
+      83
     ],
     "edits": [
       [
@@ -232,19 +232,29 @@ async function applyUiEdits(pack, directory) {
         "\tlobby_panel.size_flags_horizontal = Control.SIZE_SHRINK_CENTER\n"
       ],
       [
+        13418,
+        13418,
+        "\tif not is_pause_overlay:\n\t\tavailable = minf(available, clampf((size.y - 175.0) / 435.0, 0.25, 1.0))\n"
+      ],
+      [
         27194,
-        27328,
-        ""
+        27404,
+        "\tlobby_scroll.vertical_scroll_mode = ScrollContainer.SCROLL_MODE_SHOW_NEVER if is_pause_overlay else ScrollContainer.SCROLL_MODE_AUTO\n"
       ],
       [
         27705,
         27737,
-        "\tartwork.modulate = Color(\"e9f3ff\") if carousel else Color.WHITE\n"
+        "\tartwork.modulate = Color(\"e9f3ff\") if carousel else Color(\"e5f1ff\")\n"
       ],
       [
-        28604,
+        28516,
         28729,
-        "\tvar brand_scale := minf(size.x / 1672.0, size.y / 941.0)\n\tlogin_brand.custom_minimum_size = Vector2(640, 210) * brand_scale\n"
+        "\tlobby_margin.add_theme_constant_override(\"margin_top\", 26 if is_pause_overlay else 12)\n\tlobby_margin.add_theme_constant_override(\"margin_bottom\", 0 if is_pause_overlay else int(minf(60.0, size.y * 0.085)))\n\tvar brand_scale := minf(size.x / 1672.0, size.y / 941.0)\n\tlogin_brand.custom_minimum_size = Vector2(640, 210) * brand_scale\n"
+      ],
+      [
+        29084,
+        29084,
+        "\tif showing_carousel and not is_pause_overlay:\n\t\tvar reserved := login_brand.custom_minimum_size.y + 60.0 + lobby_margin.get_theme_constant(\"margin_bottom\") + footer.get_combined_minimum_size().y\n\t\tlobby_scroll.custom_minimum_size.y = minf(height, maxf(120.0, size.y - reserved))\n"
       ]
     ]
   },
