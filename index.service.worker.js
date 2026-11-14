@@ -4,7 +4,7 @@
 // Incrementing CACHE_VERSION will kick off the install event and force
 // previously cached resources to be updated from the network.
 /** @type {string} */
-const CACHE_VERSION = '1794667056|3138604';
+const CACHE_VERSION = '1794667224|3133694';
 /** @type {string} */
 const CACHE_PREFIX = 'Kitchen Layout G-sw-cache-';
 const CACHE_NAME = CACHE_PREFIX + CACHE_VERSION;
