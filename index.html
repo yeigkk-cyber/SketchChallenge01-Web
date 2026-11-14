@@ -2,7 +2,9 @@
 <html lang="en">
 	<head>
 		<meta charset="utf-8">
-		<meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0">
+		<meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#168be4">
+<meta name="apple-mobile-web-app-capable" content="yes">
 		<title>Kitchen Layout Game</title>
 		<style>
 html, body, #canvas {
@@ -135,9 +137,28 @@ body {
 #status-progress::-webkit-progress-value { background: linear-gradient(#ccf4ff,#2697ee); border-radius: 99px; }
 #status-progress::-moz-progress-bar { background: linear-gradient(#ccf4ff,#2697ee); }
 #status-notice { position: absolute; max-width: min(80%, 620px); }
+[hidden] { display: none !important; }
+#orientation-gate {
+ position: fixed; inset: 0; z-index: 30000; display: grid; place-items: center;
+ padding: max(24px, env(safe-area-inset-top)); background: linear-gradient(145deg,#178de4,#8ecbfa);
+ color: #174b7a; font: 16px/1.7 system-ui, sans-serif; text-align: center;
+}
+.orientation-card { width: min(100%,380px); padding: 28px 22px; border: 3px solid white; border-radius: 26px; background: #f0faff; box-shadow: 0 8px 0 #4a9ed9; }
+.orientation-phone { margin: 0 auto 18px; width: 76px; height: 42px; border: 3px solid #219bef; border-radius: 8px; position: relative; }
+.orientation-phone::after { content: ''; position: absolute; right: 5px; top: 15px; width: 5px; height: 5px; border-radius: 50%; background: #219bef; }
+.orientation-card h1 { font-size: 20px; margin: 0 0 12px; }
+.orientation-card p { margin: 0 0 20px; }
+#landscape-start, #install-app { border: 2px solid white; border-radius: 24px; background: #1c9ded; color: white; font: 600 16px/1.5 system-ui,sans-serif; min-height: 44px; padding: 10px 22px; cursor: pointer; box-shadow: 0 3px 0 #116fc0; }
+#install-app { position: fixed; right: max(12px,env(safe-area-inset-right)); bottom: max(12px,env(safe-area-inset-bottom)); z-index: 31000; font-size: 14px; }
+.portrait-blocked #canvas { visibility: hidden; pointer-events: none; }
+
 </style>
-		<link rel="icon" type="image/png" sizes="64x64" href="./kitchen-layout-tab-blue.png">
+		<link id="-gd-engine-icon" rel="icon" type="image/png" href="index.icon.png" />
 <link rel="apple-touch-icon" href="index.apple-touch-icon.png"/>
+<link rel="manifest" href="index.manifest.json">
+
+		<link rel="icon" type="image/png" sizes="64x64" href="./kitchen-layout-tab-blue.png">
+<link rel="apple-touch-icon" href="pwa-192.png"/>
 
 	</head>
 	<body>
@@ -156,10 +177,89 @@ body {
 			<div id="status-notice"></div>
 		</div>
 
+<section id="orientation-gate" hidden role="dialog" aria-modal="true" aria-labelledby="orientation-title"><div class="orientation-card"><div class="orientation-phone" aria-hidden="true"></div><h1 id="orientation-title">ဖုန်းကို အလျားလိုက်လှည့်ပါ</h1><p>横向きでプレイしてください<br>Play in landscape</p><button id="landscape-start">ဂိမ်းစမယ် · Start</button></div></section>
+<button id="install-app" hidden>Install app</button>
+<script id="mobile-app">
+(() => {
+  'use strict';
+  const gate = document.getElementById('orientation-gate');
+  const enter = document.getElementById('landscape-start');
+  const install = document.getElementById('install-app');
+  const canvas = document.getElementById('canvas');
+  const coarse = matchMedia('(pointer: coarse)');
+  const portrait = matchMedia('(orientation: portrait)');
+  const standalone = matchMedia('(display-mode: standalone)');
+  const fullscreen = matchMedia('(display-mode: fullscreen)');
+  let promptEvent = null;
+  let entering = false;
+  const waiting = [];
+  const mobile = () => coarse.matches || navigator.userAgentData?.mobile === true || /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+  const installed = () => standalone.matches || fullscreen.matches || navigator.standalone === true;
+  function update() {
+    const blocked = mobile() && portrait.matches;
+    gate.hidden = !blocked;
+    canvas.inert = blocked;
+    canvas.setAttribute('aria-hidden', String(blocked));
+    document.body.classList.toggle('portrait-blocked', blocked);
+    if (!blocked) waiting.splice(0).forEach(resolve => resolve());
+    if (installed()) install.hidden = true;
+  }
+  async function lock() {
+    if (mobile() && screen.orientation?.lock) {
+      try { await screen.orientation.lock('landscape'); } catch (_) { /* The rotate gate remains if the browser disallows locking. */ }
+    }
+    update();
+  }
+  async function enterLandscape() {
+    if (!mobile() || entering) return;
+    entering = true;
+    try {
+      if (!installed() && !document.fullscreenElement && document.documentElement.requestFullscreen) {
+        try { await document.documentElement.requestFullscreen(); } catch (_) { /* Manual rotation remains available. */ }
+      }
+      await lock();
+    } finally { entering = false; }
+  }
+  window.KitchenMobile = {
+    whenLandscape: () => (!mobile() || !portrait.matches) ? Promise.resolve() : new Promise(resolve => waiting.push(resolve)),
+  };
+  enter.addEventListener('click', enterLandscape);
+  document.addEventListener('pointerdown', event => {
+    if (event.target !== install && !install.contains(event.target)) enterLandscape();
+  }, {capture:true});
+  portrait.addEventListener('change', update);
+  coarse.addEventListener('change', update);
+  window.addEventListener('resize', update);
+  document.addEventListener('fullscreenchange', lock);
+  document.addEventListener('visibilitychange', () => { if (!document.hidden) lock(); });
+  window.addEventListener('beforeinstallprompt', event => {
+    event.preventDefault();
+    promptEvent = event;
+    install.hidden = installed();
+  });
+  install.addEventListener('click', async () => {
+    if (!promptEvent) return;
+    const event = promptEvent;
+    promptEvent = null;
+    install.hidden = true;
+    await event.prompt();
+    await event.userChoice;
+  });
+  window.addEventListener('appinstalled', () => { promptEvent = null; install.hidden = true; });
+  update();
+  // Installed Android apps honor the manifest; fullscreen permission is requested
+  // on the first browser tap when a user gesture is required.
+  lock();
+})();
+
+</script>
 		<script src="index.js"></script>
 		<script>
-const GODOT_CONFIG = {"args":[],"canvasResizePolicy":2,"emscriptenPoolSize":8,"ensureCrossOriginIsolationHeaders":true,"executable":"index","experimentalVK":false,"fileSizes":{"index.pck":37871404,"index.wasm":39514754},"focusCanvas":true,"gdextensionLibs":[],"godotPoolSize":4};
+const GODOT_CONFIG = {"args":[],"canvasResizePolicy":2,"emscriptenPoolSize":8,"ensureCrossOriginIsolationHeaders":false,"executable":"index","experimentalVK":false,"fileSizes":{"index.pck":37870768,"index.wasm":39514754},"focusCanvas":true,"gdextensionLibs":[],"godotPoolSize":4,"serviceWorker":"index.service.worker.js"};
 const GODOT_THREADS_ENABLED = false;
+if ('serviceWorker' in navigator && GODOT_CONFIG.serviceWorker) {
+ navigator.serviceWorker.register(GODOT_CONFIG.serviceWorker).catch(error => console.warn('App cache registration:',error));
+}
 
 (function () {
 	const statusOverlay = document.getElementById('status');
@@ -248,13 +348,13 @@ const GODOT_THREADS_ENABLED = false;
 	} else {
 		setStatusMode('progress');
 		const engine = new Engine(GODOT_CONFIG);
-		engine.startGame({
+		window.KitchenMobile.whenLandscape().then(() => engine.startGame({
 			canvas: document.getElementById('canvas'),
 			onProgress(current, total) {
 				if (total > 0) statusProgress.max = total;
 				statusProgress.value = current;
 			}
-		}).then(() => {
+		})).then(() => {
 			setStatusMode('hidden');
 		}, displayFailureNotice);
 	}
@@ -262,5 +362,6 @@ const GODOT_THREADS_ENABLED = false;
 		</script>
 	</body>
 </html>
+
 
 
