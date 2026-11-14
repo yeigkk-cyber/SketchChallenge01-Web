@@ -2,7 +2,7 @@
 <html lang="en">
 	<head>
 		<meta charset="utf-8">
-		<meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, viewport-fit=cover">
+		<meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, viewport-fit=cover, interactive-widget=resizes-content">
 <meta name="theme-color" content="#168be4">
 <meta name="apple-mobile-web-app-capable" content="yes">
 		<title>Kitchen Layout Game</title>
@@ -152,6 +152,16 @@ body {
 #install-app { position: fixed; right: max(12px,env(safe-area-inset-right)); bottom: max(12px,env(safe-area-inset-bottom)); z-index: 31000; font-size: 14px; }
 .portrait-blocked #canvas { visibility: hidden; pointer-events: none; }
 
+
+#kitchen-text-dialog {position:fixed;inset:0;z-index:10000;background:#10274199;display:flex;align-items:center;justify-content:center;padding:10px;box-sizing:border-box;height:100dvh;font-family:system-ui,sans-serif;color:#164976}
+#kitchen-text-dialog[hidden]{display:none}
+#kitchen-text-dialog form {width:min(520px,100%);max-height:calc(100dvh - 20px);overflow:auto;box-sizing:border-box;padding:16px;border:2px solid #8bd6ff;border-radius:18px;background:#f3fbff;box-shadow:0 5px 0 #4c9fd0}
+#kitchen-text-dialog label{display:block;margin-bottom:8px;font-size:18px}
+#kitchen-text-dialog input,#kitchen-text-dialog textarea{box-sizing:border-box;width:100%;min-height:48px;padding:10px;font:20px system-ui;border:1px solid #96c9ed;border-radius:10px;background:white;color:#163c61}
+#kitchen-text-dialog textarea{height:100px;resize:vertical}
+#kitchen-text-dialog .actions,#kitchen-text-dialog .directions{display:flex;gap:8px;margin-top:10px}
+#kitchen-text-dialog button{flex:1;min-height:44px;border:1px solid #8fbde5;border-radius:12px;background:#fff;color:#164976;font:17px system-ui}
+#kitchen-text-dialog button[type=submit],#kitchen-text-dialog button[aria-pressed=true]{background:#1598e7;color:white}
 </style>
 		<link id="-gd-engine-icon" rel="icon" type="image/png" href="index.icon.png" />
 <link rel="apple-touch-icon" href="index.apple-touch-icon.png"/>
@@ -225,7 +235,7 @@ body {
   };
   enter.addEventListener('click', enterLandscape);
   document.addEventListener('pointerdown', event => {
-    if (event.target !== install && !install.contains(event.target)) enterLandscape();
+    if (!event.target.closest('#kitchen-text-dialog') && event.target !== install && !install.contains(event.target)) enterLandscape();
   }, {capture:true});
   portrait.addEventListener('change', update);
   coarse.addEventListener('change', update);
@@ -253,13 +263,60 @@ body {
 })();
 
 </script>
-		<script src="index.js"></script>
+		
+<script>
+(() => {
+ const host=document.createElement('div');host.id='kitchen-text-dialog';host.hidden=true;host.setAttribute('role','dialog');host.setAttribute('aria-modal','true');
+ host.innerHTML='<form><label for="kitchen-native-field"></label><input id="kitchen-native-field" autocomplete="off"><textarea hidden aria-label="Answer"></textarea><div class="directions" hidden></div><div class="actions"><button type="button" class="cancel"></button><button type="submit">OK</button></div></form>';
+ document.body.append(host);
+ const fitKeyboard=()=>{if(window.visualViewport){host.style.top=visualViewport.offsetTop+'px';host.style.height=visualViewport.height+'px';}};
+ window.visualViewport?.addEventListener('resize',fitKeyboard);window.visualViewport?.addEventListener('scroll',fitKeyboard);fitKeyboard();
+ const form=host.querySelector('form'),single=host.querySelector('input'),multi=host.querySelector('textarea'),directions=host.querySelector('.directions');
+ let active=null,composing=false;
+ const normalize=value=>value.replace(/[၀-၉]/g,c=>String(c.charCodeAt(0)-0x1040)).replace(/[０-９]/g,c=>String(c.charCodeAt(0)-0xff10)).replace(/．/g,'.');
+ function close(confirmed){if(!active)return;const state=active;active=null;host.hidden=true;state.field.blur();state.callback(state.numeric?normalize(state.field.value):state.field.value,confirmed,state.axis);document.getElementById('canvas').focus();}
+ for(const field of [single,multi]){field.addEventListener('compositionstart',()=>composing=true);field.addEventListener('compositionend',()=>composing=false);field.addEventListener('keydown',e=>{if(e.key==='Escape'){e.preventDefault();close(false);}if(e.key==='Enter'&&(e.isComposing||composing||e.keyCode===229)){e.preventDefault();e.stopPropagation();}});}
+ form.addEventListener('submit',e=>{e.preventDefault();if(!composing)close(true);});
+ host.querySelector('.cancel').addEventListener('click',()=>close(false));
+ host.addEventListener('pointerdown',e=>{if(e.target===host)close(false);});
+ window.KitchenTextInput={
+  open(owner,hint,value,numeric,axis,language,callback,multiline=false){
+   if(active)close(false);composing=false;
+   single.hidden=!!multiline;multi.hidden=!multiline;
+   const field=multiline?multi:single;
+   field.value=value;field.inputMode=numeric?'decimal':'text';single.type='text';field.placeholder=hint;
+   host.querySelector('label').textContent=hint;host.setAttribute('aria-label',hint);
+   host.querySelector('.cancel').textContent=['キャンセル','မလုပ်တော့ပါ','Cancel'][language]||'Cancel';
+   active={owner,field,numeric,axis,callback};directions.hidden=axis<0;directions.replaceChildren();
+   ['→','↓','←','↑'].forEach((text,index)=>{const b=document.createElement('button');b.type='button';b.textContent=text;b.setAttribute('aria-pressed',String(index===axis));b.onclick=()=>{active.axis=index;for(const c of directions.children)c.setAttribute('aria-pressed',String(c===b));};directions.append(b);});
+   host.hidden=false;field.focus();field.select();
+  },
+  closeOwner(owner){if(active?.owner===owner)close(false);}
+ };
+})();
+</script>
+<script src="index.js"></script>
 		<script>
-const GODOT_CONFIG = {"args":[],"canvasResizePolicy":2,"emscriptenPoolSize":8,"ensureCrossOriginIsolationHeaders":false,"executable":"index","experimentalVK":false,"fileSizes":{"index.pck":29676968,"index.wasm":39514754},"focusCanvas":true,"gdextensionLibs":[],"godotPoolSize":4,"serviceWorker":"index.service.worker.js"};
+const GODOT_CONFIG = {"args":[],"canvasResizePolicy":2,"emscriptenPoolSize":8,"ensureCrossOriginIsolationHeaders":false,"executable":"index","experimentalVK":true,"fileSizes":{"index.pck":23865700,"index.wasm":39514754},"focusCanvas":true,"gdextensionLibs":[],"godotPoolSize":4,"serviceWorker":"index.service.worker.js"};
 const GODOT_THREADS_ENABLED = false;
-if ('serviceWorker' in navigator && GODOT_CONFIG.serviceWorker) {
- navigator.serviceWorker.register(GODOT_CONFIG.serviceWorker).catch(error => console.warn('App cache registration:',error));
-}
+// Finish cache activation before gameplay so an installed app does not keep old UI.
+const kitchenCacheReady = (async () => {
+ if (!('serviceWorker' in navigator) || !GODOT_CONFIG.serviceWorker) return;
+ try {
+  const registration=await navigator.serviceWorker.register(GODOT_CONFIG.serviceWorker,{updateViaCache:'none'});
+  if (!registration?.addEventListener) return;
+  await Promise.race([registration.update().catch(()=>{}),new Promise(resolve=>setTimeout(resolve,4000))]);
+  const worker=registration.waiting || registration.installing;
+  if (!worker) return;
+  await Promise.race([new Promise(resolve=>{
+   const activate=()=>{if(worker.state==='installed')worker.postMessage('claim');if(worker.state==='activated'||worker.state==='redundant')resolve();};
+   worker.addEventListener('statechange',activate);activate();
+  }),new Promise(resolve=>setTimeout(resolve,5000))]);
+  if(worker.state==='activated' && navigator.serviceWorker.controller && sessionStorage.getItem('kitchen-cache-build')!=='efdec17b12ede736f8bf493d8ef6c15ac8da3769'){
+   sessionStorage.setItem('kitchen-cache-build','efdec17b12ede736f8bf493d8ef6c15ac8da3769');location.reload();await new Promise(()=>{});
+  }
+ } catch(error){console.warn('App cache registration:',error);}
+})();
 
 (function () {
 	const statusOverlay = document.getElementById('status');
@@ -348,7 +405,7 @@ if ('serviceWorker' in navigator && GODOT_CONFIG.serviceWorker) {
 	} else {
 		setStatusMode('progress');
 		const engine = new Engine(GODOT_CONFIG);
-		window.KitchenMobile.whenLandscape().then(() => engine.startGame({
+		Promise.all([window.KitchenMobile.whenLandscape(),kitchenCacheReady]).then(() => engine.startGame({
 			canvas: document.getElementById('canvas'),
 			onProgress(current, total) {
 				if (total > 0) statusProgress.max = total;
@@ -362,6 +419,7 @@ if ('serviceWorker' in navigator && GODOT_CONFIG.serviceWorker) {
 		</script>
 	</body>
 </html>
+
 
 
 
