@@ -297,7 +297,7 @@ body {
 </script>
 <script src="index.js"></script>
 		<script>
-const GODOT_CONFIG = {"args":[],"canvasResizePolicy":2,"emscriptenPoolSize":8,"ensureCrossOriginIsolationHeaders":false,"executable":"index","experimentalVK":true,"fileSizes":{"index.pck":24015236,"index.wasm":39514754},"focusCanvas":true,"gdextensionLibs":[],"godotPoolSize":4,"serviceWorker":"index.service.worker.js"};
+const GODOT_CONFIG = {"args":[],"canvasResizePolicy":2,"emscriptenPoolSize":8,"ensureCrossOriginIsolationHeaders":false,"executable":"index","experimentalVK":true,"fileSizes":{"index.pck":24017472,"index.wasm":39514754},"focusCanvas":true,"gdextensionLibs":[],"godotPoolSize":4,"serviceWorker":"index.service.worker.js"};
 const GODOT_THREADS_ENABLED = false;
 // Finish cache activation before gameplay so an installed app does not keep old UI.
 const kitchenCacheReady = (async () => {
@@ -312,8 +312,8 @@ const kitchenCacheReady = (async () => {
    const activate=()=>{if(worker.state==='installed')worker.postMessage('claim');if(worker.state==='activated'||worker.state==='redundant')resolve();};
    worker.addEventListener('statechange',activate);activate();
   }),new Promise(resolve=>setTimeout(resolve,5000))]);
-  if(worker.state==='activated' && navigator.serviceWorker.controller && sessionStorage.getItem('kitchen-cache-build')!=='86c5a65c2d34229f393a192e444d1817a6107471'){
-   sessionStorage.setItem('kitchen-cache-build','86c5a65c2d34229f393a192e444d1817a6107471');location.reload();await new Promise(()=>{});
+  if(worker.state==='activated' && navigator.serviceWorker.controller && sessionStorage.getItem('kitchen-cache-build')!=='b9e68a3015c4c0821114b30f5d7e59ee501701f1'){
+   sessionStorage.setItem('kitchen-cache-build','b9e68a3015c4c0821114b30f5d7e59ee501701f1');location.reload();await new Promise(()=>{});
   }
  } catch(error){console.warn('App cache registration:',error);}
 })();
